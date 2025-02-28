@@ -43,7 +43,7 @@ class Student implements  Comparable<Student> {
 }
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
+public class ComparableVsComparator {
     public static void main(String[] args) {
      Student S1=new Student(1, "jashwanth", "redmond");
      Student S2=new Student(2, "Jay", "seattle");
