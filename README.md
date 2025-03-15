@@ -1,5 +1,3 @@
-##Java Projects
-
 Over the years, I've accumulated extensive hands-on experience in Java development, both through my professional career and personal learning journey. At Tata Consultancy Services (TCS) and People’s Tech Group (PTG), I've been deeply involved in full-stack Java development, significantly enhancing my expertise in Java frameworks, microservices, and cloud technologies.
 
 Additionally, I've built numerous Java projects by learning from resources like Ineuron and various YouTube tutorials. These projects are neatly organized into folders, each containing multiple practical examples to illustrate key Java concepts and best practices clearly and concisely.
