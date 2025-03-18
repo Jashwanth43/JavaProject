@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/spring-core"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/mysql"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/hikaricp"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

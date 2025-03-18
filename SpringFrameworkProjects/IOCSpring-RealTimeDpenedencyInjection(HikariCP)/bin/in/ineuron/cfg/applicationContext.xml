@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+  <bean id="mysqlDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+  <property name="driverClassName" value='com.mysql.cj.jdbc.Driver'/>
+  <!--  <property name="url" value='jdbc:mysql://localhost:3306/enterprisejavabatch'/> -->
+    <property name="connectionProperties">
+    <props>
+    <prop key="user">root</prop>
+    <prop key="password">root</prop>
+    </props>
+    </property>
+  </bean>
+  <bean id='hikariDataSource' class='com.zaxxer.hikari.HikariDataSource' parent="mysqlDataSource">
+		<property name="jdbcUrl" value='jdbc:mysql:///enterprisejavabatch' />
+		<property name="minimumIdle" value='10' /><!-- min pool size -->
+		<property name="maximumPoolSize" value='20' />
+		<property name="connectionTimeout" value='2000' />
+	</bean>
+  
+ <bean id='mysqlDaoImpl' class='in.ineuron.dao.CustomerMySQLDAOImp'>
+	<constructor-arg name='dataSource' ref='hikariDataSource' /> 
+ </bean>
+  <bean id='serviceImpl' class='in.ineuron.service.CustomerMgmtServiceImpl'>
+	<constructor-arg name='dao' ref='mysqlDaoImpl' /> 
+ </bean>
+ <bean id='controller' class='in.ineuron.controller.MainController'>
+	<constructor-arg name='service' ref='serviceImpl' /> 
+ </bean>
+ 
+</beans>

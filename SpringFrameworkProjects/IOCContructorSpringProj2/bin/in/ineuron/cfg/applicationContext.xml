@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	<bean id="stu" class="in.ineuron.bean.Student">
+		<constructor-arg name="name" value='Jashwanth'></constructor-arg>
+		<constructor-arg name="sal" value="5000.0"></constructor-arg>
+		<constructor-arg name="id" value='10'></constructor-arg>
+	</bean>
+	<bean id="stu1" class="in.ineuron.bean.Student">
+		<property name="name" value="anantha"></property>
+		<property name="sal" value="1000.0"></property>
+		<property name="id" value="20"></property>
+
+	</bean>
+</beans>

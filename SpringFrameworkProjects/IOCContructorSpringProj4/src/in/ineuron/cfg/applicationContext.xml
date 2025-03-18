@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	
+	<!-- <bean id="baseCar" class="in.ineuron.bean.Car" abstract="true">
+	<constructor-arg name="engineCC" value="1500"/>
+	<constructor-arg name="model" value="swift"/>
+	<constructor-arg name="company" value="suzuki"/>
+	<constructor-arg name="fuelType" value="diesel"/>
+	<constructor-arg name="type" value="hatchback"/>
+	</bean>
+	<bean id='ca  r1' class='in.ineuron.bean.Car' parent="baseCar">
+		<constructor-arg name="owner" value='sachin' />
+		<constructor-arg name="regNo" value='KA4567' />
+		<constructor-arg name="color" value='red' />
+		<constructor-arg name="engineNo" value='12345' />
+	</bean>
+
+	<bean id='car2' class='in.ineuron.bean.Car' parent="baseCar">
+		<constructor-arg name="owner" value='dhoni' />
+		<constructor-arg name="regNo" value='JH5647' />
+		<constructor-arg name="color" value='white' />
+		<constructor-arg name="engineNo" value='56789' />
+	</bean> -->
+	<bean id="baseCar" class="in.ineuron.bean.Car" abstract="true">
+	<constructor-arg  name="engineCC" value="1500"/>
+	<constructor-arg  name="model" value="swift"/>
+	<constructor-arg  name="company" value="SUZUKI"/>
+	<constructor-arg  name="fuelType" value="PETROL"/>
+	<constructor-arg  name="type" value="hatchback"/>
+	</bean>
+	<bean id='car1' class='in.ineuron.bean.Car' parent="baseCar">
+		<constructor-arg name="owner" value='sachin' />
+		<constructor-arg name="regNo" value='KA4567' />
+		<constructor-arg name="color" value='red' />
+		<constructor-arg name="engineNo" value='12345' />
+	</bean>
+
+	<bean id='car2' class='in.ineuron.bean.Car' parent="baseCar">
+		<constructor-arg name="owner" value='dhoni' />
+		<constructor-arg name="regNo" value='JH5647' />
+		<constructor-arg name="color" value='white' />
+		<constructor-arg name="engineNo" value='56789' />
+	</bean>
+</beans>
