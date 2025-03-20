@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+<context-param>
+<param-name>url</param-name>
+<param-value>jdbc:mysql://localhost:3306/user</param-value>
+</context-param>
+<context-param>
+<param-name>username</param-name>
+<param-value>root</param-value>
+</context-param>
+<context-param>
+<param-name>password</param-name>
+<param-value>root</param-value>
+</context-param>
+</web-app>
