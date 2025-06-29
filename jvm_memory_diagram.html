@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JVM Memory Areas</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        
+        .jvm-container {
+            display: flex;
+            padding: 30px;
+            gap: 30px;
+            min-height: 800px;
+        }
+        
+        .memory-area {
+            border: 3px solid;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .method-area {
+            flex: 1;
+            border-color: #e74c3c;
+            background: linear-gradient(to bottom, #ffebee, #ffcccb);
+        }
+        
+        .stack-area {
+            flex: 1;
+            border-color: #3498db;
+            background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+        }
+        
+        .heap-area {
+            flex: 1;
+            border-color: #f39c12;
+            background: linear-gradient(to bottom, #fff3e0, #ffe0b2);
+        }
+        
+        .area-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+        }
+        
+        .method-area .area-title {
+            background: #e74c3c;
+        }
+        
+        .stack-area .area-title {
+            background: #3498db;
+        }
+        
+        .heap-area .area-title {
+            background: #f39c12;
+        }
+        
+        .content-box {
+            background: rgba(255,255,255,0.9);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid;
+        }
+        
+        .method-area .content-box {
+            border-left-color: #e74c3c;
+        }
+        
+        .stack-area .content-box {
+            border-left-color: #3498db;
+        }
+        
+        .heap-area .content-box {
+            border-left-color: #f39c12;
+        }
+        
+        .stack-frame {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px dashed #3498db;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+        
+        .frame-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .variable {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px 0;
+            font-size: 0.9em;
+        }
+        
+        .comparison-table {
+            margin: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: linear-gradient(90deg, #34495e, #2c3e50);
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .key-points {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px;
+        }
+        
+        .key-points h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .key-points ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .key-points li {
+            background: white;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .arrow {
+            font-size: 1.5em;
+            color: #e74c3c;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>JVM Memory Areas: Method Area vs Stack Area</h1>
+            <p>Visual representation of how Java Virtual Machine manages memory</p>
+        </div>
+        
+        <div class="jvm-container">
+            <!-- Method Area -->
+            <div class="memory-area method-area">
+                <div class="area-title">METHOD AREA (Metaspace)</div>
+                
+                <div class="content-box">
+                    <h4>🏛️ Class Metadata</h4>
+                    <div class="variable">Class: JVMMemoryDemo.class</div>
+                    <div class="variable">Methods: main(), staticMethod(), instanceMethod()</div>
+                    <div class="variable">Bytecode for all methods</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>📊 Static Variables</h4>
+                    <div class="variable">className = "JVMMemoryDemo"</div>
+                    <div class="variable">MAX_VALUE = 100</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>🔧 Runtime Constant Pool</h4>
+                    <div class="variable">String literals</div>
+                    <div class="variable">Method references</div>
+                    <div class="variable">Field references</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>✨ Characteristics</h4>
+                    <div class="variable">• Shared across all threads</div>
+                    <div class="variable">• Created at JVM startup</div>
+                    <div class="variable">• Stores class-level information</div>
+                </div>
+            </div>
+            
+            <!-- Stack Area -->
+            <div class="memory-area stack-area">
+                <div class="area-title">STACK AREA (Per Thread)</div>
+                
+                <div class="stack-frame">
+                    <div class="frame-title">📋 main() Stack Frame</div>
+                    <div class="variable">mainLocal = 5</div>
+                    <div class="variable">mainMessage = "Main method..."</div>
+                    <div class="variable">args[] reference</div>
+                </div>
+                
+                <div class="stack-frame">
+                    <div class="frame-title">📋 staticMethod() Stack Frame</div>
+                    <div class="variable">localVar1 = 10</div>
+                    <div class="variable">localVar2 = "Local in static..."</div>
+                </div>
+                
+                <div class="stack-frame">
+                    <div class="frame-title">📋 helperMethod() Stack Frame</div>
+                    <div class="variable">param = 10</div>
+                    <div class="variable">helperLocal = 20</div>
+                    <div class="variable">helperMessage = "Helper..."</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>✨ Characteristics</h4>
+                    <div class="variable">• Thread-specific (private)</div>
+                    <div class="variable">• LIFO (Last In, First Out)</div>
+                    <div class="variable">• Automatic memory management</div>
+                    <div class="variable">• Method call = New frame</div>
+                </div>
+            </div>
+            
+            <!-- Heap Area for Reference -->
+            <div class="memory-area heap-area">
+                <div class="area-title">HEAP AREA</div>
+                
+                <div class="content-box">
+                    <h4>🏠 Object Instances</h4>
+                    <div class="variable">JVMMemoryDemo obj1</div>
+                    <div class="variable">JVMMemoryDemo obj2</div>
+                    <div class="variable">String objects</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>🗑️ Garbage Collection</h4>
+                    <div class="variable">Young Generation</div>
+                    <div class="variable">Old Generation</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>✨ Characteristics</h4>
+                    <div class="variable">• Shared across threads</div>
+                    <div class="variable">• Dynamic allocation</div>
+                    <div class="variable">• Garbage collected</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Comparison Table -->
+        <div class="comparison-table">
+            <h2 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">📊 Detailed Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Method Area</th>
+                        <th>Stack Area</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Purpose</strong></td>
+                        <td>Stores class-level information and metadata</td>
+                        <td>Stores method-specific data and local variables</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scope</strong></td>
+                        <td>Shared across all threads in JVM</td>
+                        <td>Private to each thread</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Contents</strong></td>
+                        <td>Class bytecode, static variables, constant pool</td>
+                        <td>Local variables, method parameters, return addresses</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lifetime</strong></td>
+                        <td>From JVM startup to shutdown</td>
+                        <td>Duration of method execution</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory Management</strong></td>
+                        <td>Managed by JVM, rarely garbage collected</td>
+                        <td>Automatic - freed when method exits</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Structure</strong></td>
+                        <td>Logical area, implementation varies</td>
+                        <td>LIFO stack structure per thread</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Exceptions</strong></td>
+                        <td>OutOfMemoryError (Metaspace)</td>
+                        <td>StackOverflowError</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Key Points -->
+        <div class="key-points">
+            <h3>🔑 Key Takeaways</h3>
+            <ul>
+                <li><strong>Method Area:</strong> Think of it as a "library" where all class blueprints and shared resources are stored. Every thread can access this information.</li>
+                <li><strong>Stack Area:</strong> Like a "personal workspace" for each thread, where temporary data for method execution is stored and automatically cleaned up.</li>
+                <li><strong>Relationship:</strong> Methods defined in Method Area are executed using Stack Area for local storage.</li>
+                <li><strong>Performance:</strong> Stack operations are faster (LIFO), while Method Area access involves more overhead for class loading and resolution.</li>
+                <li><strong>Memory Errors:</strong> Stack overflow occurs with deep recursion, while Method Area issues arise with too many classes loaded.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
