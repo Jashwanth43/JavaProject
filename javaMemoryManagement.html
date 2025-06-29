@@ -1,0 +1,87 @@
+// JVM Memory Areas Demonstration
+// This program illustrates how Method Area and Stack Area work
+
+public class JVMMemoryDemo {
+    // Class-level variables (stored in Method Area)
+    private static String className = "JVMMemoryDemo";  // Static variable
+    private static final int MAX_VALUE = 100;           // Static final variable
+    
+    private String instanceVar = "Instance Variable";   // Instance variable metadata
+    
+    // Static method (bytecode stored in Method Area)
+    public static void staticMethod() {
+        // Local variables (stored in Stack Area for current thread)
+        int localVar1 = 10;
+        String localVar2 = "Local in static method";
+        
+        System.out.println("Static method executing");
+        System.out.println("Local variable: " + localVar1);
+        
+        // Method call creates new stack frame
+        helperMethod(localVar1);
+    }
+    
+    // Instance method (bytecode stored in Method Area)
+    public void instanceMethod() {
+        // Local variables (stored in Stack Area)
+        int localVar = 20;
+        String message = "Instance method local";
+        
+        System.out.println("Instance method executing");
+        System.out.println("Instance variable: " + instanceVar);
+        System.out.println("Local variable: " + localVar);
+        
+        // Recursive call to demonstrate stack frame creation
+        if (localVar > 0) {
+            recursiveMethod(localVar - 15);
+        }
+    }
+    
+    // Helper method to show stack frame creation
+    private static void helperMethod(int param) {
+        // New stack frame created for this method
+        int helperLocal = param * 2;
+        String helperMessage = "Helper method";
+        
+        System.out.println("Helper method: " + helperLocal);
+    }
+    
+    // Recursive method to demonstrate multiple stack frames
+    private void recursiveMethod(int count) {
+        // Each recursive call creates a new stack frame
+        if (count > 0) {
+            System.out.println("Recursive call: " + count);
+            recursiveMethod(count - 1);  // New stack frame
+        } else {
+            System.out.println("Base case reached");
+        }
+    }
+    
+    public static void main(String[] args) {
+        System.out.println("=== JVM Memory Areas Demo ===\n");
+        
+        // main method creates initial stack frame
+        int mainLocal = 5;
+        String mainMessage = "Main method local variable";
+        
+        System.out.println("Main method locals: " + mainLocal + ", " + mainMessage);
+        
+        // Static method call - creates new stack frame
+        System.out.println("\n--- Calling static method ---");
+        staticMethod();
+        
+        // Object creation - object stored in Heap, reference in Stack
+        System.out.println("\n--- Creating object and calling instance method ---");
+        JVMMemoryDemo obj = new JVMMemoryDemo();
+        obj.instanceMethod();
+        
+        // Demonstrate method area sharing
+        JVMMemoryDemo obj2 = new JVMMemoryDemo();
+        System.out.println("\n--- Multiple objects share same method area ---");
+        System.out.println("Object 1 class: " + obj.getClass().getName());
+        System.out.println("Object 2 class: " + obj2.getClass().getName());
+        System.out.println("Same class reference: " + (obj.getClass() == obj2.getClass()));
+        
+        System.out.println("\n=== Demo completed ===");
+    }
+}
