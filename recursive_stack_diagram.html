@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recursive Method Storage in JVM</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.8em;
+            font-weight: bold;
+        }
+        
+        .memory-layout {
+            display: flex;
+            padding: 30px;
+            gap: 30px;
+            min-height: 900px;
+        }
+        
+        .method-area {
+            flex: 1;
+            background: linear-gradient(to bottom, #ffebee, #ffcccb);
+            border: 3px solid #e74c3c;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .stack-area {
+            flex: 2;
+            background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+            border: 3px solid #3498db;
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .heap-area {
+            flex: 1;
+            background: linear-gradient(to bottom, #fff3e0, #ffe0b2);
+            border: 3px solid #f39c12;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .area-title {
+            font-size: 1.6em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .method-area .area-title {
+            background: #e74c3c;
+        }
+        
+        .stack-area .area-title {
+            background: #3498db;
+        }
+        
+        .heap-area .area-title {
+            background: #f39c12;
+        }
+        
+        .stack-frame {
+            background: rgba(255,255,255,0.95);
+            border: 3px solid #3498db;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 8px 0;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .frame-header {
+            background: #3498db;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .frame-number {
+            background: rgba(255,255,255,0.3);
+            padding: 2px 8px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        
+        .frame-content {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .variable {
+            background: #f8f9fa;
+            padding: 6px 10px;
+            border-radius: 5px;
+            margin: 4px 0;
+            border-left: 3px solid #3498db;
+        }
+        
+        .this-reference {
+            background: #e8f5e8;
+            border-left-color: #27ae60;
+        }
+        
+        .return-address {
+            background: #fff3cd;
+            border-left-color: #f39c12;
+        }
+        
+        .method-info {
+            background: #e1ecf4;
+            border-left-color: #6c757d;
+        }
+        
+        .content-box {
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 12px 0;
+            border-left: 4px solid;
+        }
+        
+        .method-area .content-box {
+            border-left-color: #e74c3c;
+        }
+        
+        .heap-area .content-box {
+            border-left-color: #f39c12;
+        }
+        
+        .arrow-down {
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #e74c3c;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(-50%); }
+            40% { transform: translateY(-60%); }
+            60% { transform: translateY(-55%); }
+        }
+        
+        .execution-flow {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px;
+        }
+        
+        .flow-step {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .key-points {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px;
+        }
+        
+        .key-points h3 {
+            margin-top: 0;
+            font-size: 1.8em;
+        }
+        
+        .key-points ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .key-points li {
+            background: rgba(255,255,255,0.1);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #fff;
+        }
+        
+        .stack-pointer {
+            position: absolute;
+            left: -40px;
+            top: 20px;
+            font-size: 2em;
+            color: #e74c3c;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .memory-addresses {
+            font-size: 0.8em;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Recursive Method Storage in JVM</h1>
+            <p>How recursive calls create multiple stack frames</p>
+        </div>
+        
+        <div class="memory-layout">
+            <!-- Method Area -->
+            <div class="method-area">
+                <div class="area-title">🏛️ METHOD AREA</div>
+                
+                <div class="content-box">
+                    <h4>📋 Method Bytecode</h4>
+                    <div class="variable">factorialRecursive(int n)</div>
+                    <div class="variable">fibonacciRecursive(int n)</div>
+                    <div class="variable">deepRecursion(int depth)</div>
+                    <div class="memory-addresses">@0x1A2B3C4D</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>🔧 Class Metadata</h4>
+                    <div class="variable">RecursiveMethodStorage.class</div>
+                    <div class="variable">Method signatures</div>
+                    <div class="variable">Field descriptors</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>📊 Static Variables</h4>
+                    <div class="variable">globalCounter = 8</div>
+                    <div class="memory-addresses">@0x2B3C4D5E</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>💾 Constant Pool</h4>
+                    <div class="variable">"factorial("</div>
+                    <div class="variable">"Stack Frame Created"</div>
+                    <div class="variable">"DemoObject"</div>
+                </div>
+            </div>
+            
+            <!-- Stack Area -->
+            <div class="stack-area">
+                <div class="area-title">📚 STACK AREA (Thread Stack)</div>
+                <div class="stack-pointer">👉</div>
+                
+                <!-- Stack frames in LIFO order -->
+                <div class="stack-frame">
+                    <div class="frame-header">
+                        <span>factorialRecursive(1) - BASE CASE</span>
+                        <span class="frame-number">Frame #4</span>
+                    </div>
+                    <div class="frame-content">
+                        <div class="variable">Parameter: n = 1</div>
+                        <div class="variable">Local: localN = 1</div>
+                        <div class="variable method-info">Local: methodInfo = "factorial(1)"</div>
+                        <div class="variable this-reference">this reference → @0x7F8A9B2C (Heap)</div>
+                        <div class="variable return-address">Return address → factorialRecursive(2)</div>
+                        <div class="memory-addresses">Frame @ 0xFFFF2000</div>
+                    </div>
+                </div>
+                
+                <div class="stack-frame">
+                    <div class="frame-header">
+                        <span>factorialRecursive(2)</span>
+                        <span class="frame-number">Frame #3</span>
+                    </div>
+                    <div class="frame-content">
+                        <div class="variable">Parameter: n = 2</div>
+                        <div class="variable">Local: localN = 2</div>
+                        <div class="variable method-info">Local: methodInfo = "factorial(2)"</div>
+                        <div class="variable this-reference">this reference → @0x7F8A9B2C (Heap)</div>
+                        <div class="variable">Local: result = (waiting for return)</div>
+                        <div class="variable return-address">Return address → factorialRecursive(3)</div>
+                        <div class="memory-addresses">Frame @ 0xFFFF2100</div>
+                    </div>
+                </div>
+                
+                <div class="stack-frame">
+                    <div class="frame-header">
+                        <span>factorialRecursive(3)</span>
+                        <span class="frame-number">Frame #2</span>
+                    </div>
+                    <div class="frame-content">
+                        <div class="variable">Parameter: n = 3</div>
+                        <div class="variable">Local: localN = 3</div>
+                        <div class="variable method-info">Local: methodInfo = "factorial(3)"</div>
+                        <div class="variable this-reference">this reference → @0x7F8A9B2C (Heap)</div>
+                        <div class="variable">Local: result = (waiting for return)</div>
+                        <div class="variable return-address">Return address → factorialRecursive(4)</div>
+                        <div class="memory-addresses">Frame @ 0xFFFF2200</div>
+                    </div>
+                </div>
+                
+                <div class="stack-frame">
+                    <div class="frame-header">
+                        <span>factorialRecursive(4) - INITIAL CALL</span>
+                        <span class="frame-number">Frame #1</span>
+                    </div>
+                    <div class="frame-content">
+                        <div class="variable">Parameter: n = 4</div>
+                        <div class="variable">Local: localN = 4</div>
+                        <div class="variable method-info">Local: methodInfo = "factorial(4)"</div>
+                        <div class="variable this-reference">this reference → @0x7F8A9B2C (Heap)</div>
+                        <div class="variable">Local: result = (waiting for return)</div>
+                        <div class="variable return-address">Return address → main()</div>
+                        <div class="memory-addresses">Frame @ 0xFFFF2300</div>
+                    </div>
+                </div>
+                
+                <div class="stack-frame">
+                    <div class="frame-header">
+                        <span>main(String[] args)</span>
+                        <span class="frame-number">Frame #0</span>
+                    </div>
+                    <div class="frame-content">
+                        <div class="variable">Local: demo → @0x7F8A9B2C (Heap)</div>
+                        <div class="variable">Local: result = (waiting for return)</div>
+                        <div class="variable">Parameter: args[] → String array</div>
+                        <div class="memory-addresses">Frame @ 0xFFFF2400</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Heap Area -->
+            <div class="heap-area">
+                <div class="area-title">🏠 HEAP AREA</div>
+                
+                <div class="content-box">
+                    <h4>🏠 Object Instance</h4>
+                    <div class="variable">RecursiveMethodStorage object</div>
+                    <div class="variable">instanceName = "DemoObject"</div>
+                    <div class="memory-addresses">@0x7F8A9B2C</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>📝 String Objects</h4>
+                    <div class="variable">"factorial(4)"</div>
+                    <div class="variable">"factorial(3)"</div>
+                    <div class="variable">"factorial(2)"</div>
+                    <div class="variable">"factorial(1)"</div>
+                </div>
+                
+                <div class="content-box">
+                    <h4>🔄 Reference Relationship</h4>
+                    <div class="variable">All 'this' references point to same object</div>
+                    <div class="variable">Object shared across all frames</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Execution Flow -->
+        <div class="execution-flow">
+            <h2 style="text-align: center; color: #2c3e50; margin-bottom: 25px;">🔄 Recursive Execution Flow</h2>
+            
+            <div class="flow-step">
+                <span class="step-number">1</span>
+                <strong>Initial Call:</strong> main() calls demo.factorialRecursive(4) - Creates Frame #1
+            </div>
+            
+            <div class="flow-step">
+                <span class="step-number">2</span>
+                <strong>First Recursion:</strong> factorialRecursive(4) calls factorialRecursive(3) - Creates Frame #2
+            </div>
+            
+            <div class="flow-step">
+                <span class="step-number">3</span>
+                <strong>Second Recursion:</strong> factorialRecursive(3) calls factorialRecursive(2) - Creates Frame #3
+            </div>
+            
+            <div class="flow-step">
+                <span class="step-number">4</span>
+                <strong>Final Recursion:</strong> factorialRecursive(2) calls factorialRecursive(1) - Creates Frame #4
+            </div>
+            
+            <div class="flow-step">
+                <span class="step-number">5</span>
+                <strong>Base Case:</strong> factorialRecursive(1) returns 1 - Frame #4 destroyed
+            </div>
+            
+            <div class="flow-step">
+                <span class="step-number">6</span>
+                <strong>Unwinding:</strong> Each frame returns its result and gets destroyed (LIFO order)
+            </div>
+        </div>
+        
+        <!-- Key Points -->
+        <div class="key-points">
+            <h3>🔑 Key Points About Recursive Method Storage</h3>
+            <ul>
+                <li><strong>Method Bytecode:</strong> Stored ONCE in Method Area, shared by all recursive calls</li>
+                <li><strong>Stack Frames:</strong> Each recursive call creates a NEW stack frame with its own local variables</li>
+                <li><strong>'this' Reference:</strong> Each instance method frame contains a reference to the same object in Heap</li>
+                <li><strong>Parameters & Locals:</strong> Each frame has its own copy of parameters and local variables</li>
+                <li><strong>Return Addresses:</strong> Each frame stores where to return when method completes</li>
+                <li><strong>Memory Addresses:</strong> Stack frames are allocated at different memory addresses</li>
+                <li><strong>LIFO Order:</strong> Frames are created/destroyed in Last-In-First-Out order</li>
+                <li><strong>Stack Overflow:</strong> Too many recursive calls exhaust stack space</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
